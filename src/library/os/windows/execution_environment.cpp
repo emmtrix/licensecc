@@ -29,13 +29,13 @@ CONTAINER_TYPE wine_container() {
 	char szLogicalDrives[MAX_PATH] = {0};
 
 	CONTAINER_TYPE result = CONTAINER_TYPE::NONE;
-	const DWORD dwResult = GetLogicalDriveStrings(dwSize, szLogicalDrives);
+	const DWORD dwResult = GetLogicalDriveStringsA(dwSize, szLogicalDrives);
 
 	if (dwResult > 0 && dwResult <= MAX_PATH) {
 		char* szSingleDrive = szLogicalDrives;
 		while (*szSingleDrive && ndrives < MAX_UNITS) {
 			// get the next drive
-			UINT driveType = GetDriveType(szSingleDrive);
+			UINT driveType = GetDriveTypeA(szSingleDrive);
 			if (driveType == DRIVE_FIXED) {
 				string name = szSingleDrive + string("/var/run/systemd/container");
 				try {

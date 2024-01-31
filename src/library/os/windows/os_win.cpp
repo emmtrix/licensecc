@@ -12,11 +12,11 @@ using namespace std;
 
 FUNCTION_RETURN getMachineName(unsigned char identifier[6]) {
 	FUNCTION_RETURN result = FUNC_RET_ERROR;
-	char buffer[MAX_COMPUTERNAME_LENGTH + 1];
+	wchar_t buffer[MAX_COMPUTERNAME_LENGTH + 1];
 	int bufsize = MAX_COMPUTERNAME_LENGTH + 1;
-	const BOOL cmpName = GetComputerName(buffer, (unsigned long*)&bufsize);
+	const BOOL cmpName = GetComputerNameW(buffer, (unsigned long*)&bufsize);
 	if (cmpName) {
-		strncpy((char*)identifier, buffer, 6);
+		wcstombs((char*)identifier, buffer, 6);
 		result = FUNC_RET_OK;
 	}
 	return result;
@@ -30,23 +30,23 @@ FUNCTION_RETURN getDiskInfos(std::vector<DiskInfo>& diskInfos) {
 	DWORD fileMaxLen;
 	size_t ndrives = 0, drives_scanned = 0;
 	DWORD fileFlags;
-	char volName[MAX_PATH];
+	wchar_t volName[MAX_PATH];
 	DWORD volSerial = 0;
 	const DWORD dwSize = MAX_PATH;
-	char szLogicalDrives[MAX_PATH] = {0};
+	wchar_t szLogicalDrives[MAX_PATH] = {0};
 
 	FUNCTION_RETURN return_value;
-	const DWORD dwResult = GetLogicalDriveStrings(dwSize, szLogicalDrives);
+	const DWORD dwResult = GetLogicalDriveStringsW(dwSize, szLogicalDrives);
 
 	if (dwResult > 0) {
 		return_value = FUNC_RET_OK;
-		char* szSingleDrive = szLogicalDrives;
+		wchar_t* szSingleDrive = szLogicalDrives;
 		while (*szSingleDrive && drives_scanned < MAX_UNITS) {
 			// get the next drive
-			UINT driveType = GetDriveType(szSingleDrive);
+			UINT driveType = GetDriveTypeW(szSingleDrive);
 			if (driveType == DRIVE_FIXED) {
-				char fileSysName[MAX_PATH];
-				BOOL success = GetVolumeInformation(szSingleDrive, volName, MAX_PATH, &volSerial, &fileMaxLen,
+				wchar_t fileSysName[MAX_PATH];
+				BOOL success = GetVolumeInformationW(szSingleDrive, volName, MAX_PATH, &volSerial, &fileMaxLen,
 													&fileFlags, fileSysName, MAX_PATH);
 				if (success) {
 					LOG_DEBUG("drive: %s,volume Name: %s, Volume Serial: 0x%x,Filesystem: %s", szSingleDrive, volName,
@@ -54,8 +54,8 @@ FUNCTION_RETURN getDiskInfos(std::vector<DiskInfo>& diskInfos) {
 					DiskInfo diskInfo = {};
 					diskInfo.id = (int)ndrives;
 					diskInfo.label_initialized = true;
-					license::mstrlcpy(diskInfo.device, volName, min(std::size_t{MAX_PATH}, sizeof(volName)));
-					license::mstrlcpy(diskInfo.label, fileSysName, min(sizeof(diskInfos[ndrives].label), sizeof(fileSysName)));
+					wcstombs(diskInfo.device, volName, min(std::size_t{MAX_PATH}, sizeof(volName)));
+					wcstombs(diskInfo.label, fileSysName, min(sizeof(diskInfos[ndrives].label), sizeof(fileSysName)));
 					memcpy(diskInfo.disk_sn, &volSerial, sizeof(DWORD));
 					diskInfo.sn_initialized = true;
 					diskInfo.preferred = (szSingleDrive[0] == 'C');
@@ -67,7 +67,7 @@ FUNCTION_RETURN getDiskInfos(std::vector<DiskInfo>& diskInfos) {
 			} else {
 				LOG_DEBUG("This volume is not fixed : %s, type: %d", szSingleDrive);
 			}
-			szSingleDrive += strlen(szSingleDrive) + 1;
+			szSingleDrive += wcslen(szSingleDrive) + 1;
 			drives_scanned++;
 		}
 	}
@@ -83,9 +83,12 @@ FUNCTION_RETURN getDiskInfos(std::vector<DiskInfo>& diskInfos) {
 
 FUNCTION_RETURN getModuleName(char buffer[MAX_PATH]) {
 	FUNCTION_RETURN result = FUNC_RET_OK;
-	const DWORD wres = GetModuleFileName(NULL, buffer, MAX_PATH);
+	wchar_t wbuffer[MAX_PATH];
+	const DWORD wres = GetModuleFileNameW(NULL, wbuffer, MAX_PATH);
 	if (wres == 0) {
 		result = FUNC_RET_ERROR;
+	} else {
+		wcstombs(buffer, wbuffer, wres);
 	}
 	return result;
 }

@@ -31,7 +31,7 @@ using namespace std;
 
 static const void formatError(DWORD status, const char *description) {
 	char msgBuffer[256];
-	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, status, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &msgBuffer[0],
+	FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, status, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), &msgBuffer[0],
 				  sizeof(msgBuffer) - 1, nullptr);
 	LOG_DEBUG("error %s : %s %h", description, msgBuffer, status);
 }
