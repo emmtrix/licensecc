@@ -8,3 +8,6 @@ target_link_libraries(lccinspector
      Boost::system)
 
 install(TARGETS lccinspector RUNTIME DESTINATION bin/${LCC_PROJECT_NAME})
+
+target_compile_options(lccinspector PRIVATE
+          $<$<CXX_COMPILER_ID:MSVC>:/EHsc>)

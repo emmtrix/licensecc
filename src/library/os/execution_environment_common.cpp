@@ -7,7 +7,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <unordered_map>
+#include <unordered_set>
 #include <array>
+#include <algorithm>
 #include <licensecc/datatypes.h>
 
 #include "../base/base.h"
@@ -42,6 +44,63 @@ static LCC_API_VIRTUALIZATION_DETAIL find_in_map(const unordered_map<string, LCC
 	return BARE_TO_METAL;
 }
 
+const unordered_set<string> bios_vendors {
+	"AMERICAN MEGATRENDS", "AMI", "INSYDE",			  "INTEL",			 "PHOENIX",	  "AWARD",	"CHIPS & TECHNOLOGIES",
+	"GENERAL SOFTWARE",	   "IBM", "MICROID RESEARCH", "QUADTEL UNICORE", "AWARDBIOS", "AMIBIOS"};
+
+const unordered_set<string> system_vendors{ 
+										   "ALBATRON",
+										   "AMD",
+										   "AOPEN",
+										   "ASROCK",
+										   "ASUS",
+										   "BFG TECHNOLOGIES",
+										   "BIOSTAR",
+										   "CHAINTECH",
+										   "DELL",
+										   "DFI",
+										   "ELITEGROUP",
+										   "EPOX",
+										   "EVGA CORPORATION",
+										   "FIRST INTERNATIONAL COMPUTER",
+										   "FOXCONN",
+										   "FUJITSU",
+										   "FUJITSU SIEMENS",
+										   "GIGABYTE",
+										   "GUMSTIX",
+										   "HP-COMPAQ",
+										   "HP",
+										   "IBM",
+										   "INTEL",
+										   "ISEE",
+										   "LENOVO",
+										   "LIBRE COMPUTER PROJECT",
+										   "MERIX CORPORATION",
+										   "MICRO - STAR INTERNATIONAL",
+										   "MSI",
+										   "PC CHIPS",
+										   "SAPPHIRE TECHNOLOGY",
+										   "SHUTTLE INC.",
+										   "SUPERMICRO",
+										   "TYAN",
+										   "UNIVERSAL ABIT",
+										   "VIA TECHNOLOGIES",
+										   "ZOTAC"};
+
+static bool find_in_set(const unordered_set<string>& set,
+												 const string& data) {
+	string upper(data);
+	transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+	for (auto it : set) {
+		if (upper.find(it) != string::npos) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 LCC_API_VIRTUALIZATION_SUMMARY ExecutionEnvironment::virtualization() const {
 	LCC_API_VIRTUALIZATION_SUMMARY result;
 	bool isContainer = is_container();
@@ -70,7 +129,7 @@ LCC_API_VIRTUALIZATION_DETAIL ExecutionEnvironment::virtualization_detail() cons
 		}
 	}
 	if (result == BARE_TO_METAL) {
-		if (m_cpu_info.is_hypervisor_set() || is_cloud()) {
+		if (/* m_cpu_info.is_hypervisor_set() || */ is_cloud()) {
 			result = V_OTHER;
 		}
 	}
@@ -100,6 +159,10 @@ LCC_API_CLOUD_PROVIDER ExecutionEnvironment::cloud_provider() const {
 			result = AWS;
 		} else if (bios_description.find("HP-COMPAQ") != string::npos ||
 				   bios_description.find("ASUS") != string::npos || bios_description.find("DELL") != string::npos) {
+			result = ON_PREMISE;
+		} else if (find_in_set(bios_vendors, bios_vendor)) {
+			result = ON_PREMISE;
+		} else if (find_in_set(system_vendors, sys_vendor)) {
 			result = ON_PREMISE;
 		}
 	}
