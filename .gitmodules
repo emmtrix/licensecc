@@ -1,5 +1,5 @@
 [submodule "license-generator"]
 	path = extern/license-generator
-	url = git@github.com:emmtrix/lcc-license-generator.git
+	url = https://github.com/emmtrix/lcc-license-generator.git
 	branch = .
 	ignore = all
