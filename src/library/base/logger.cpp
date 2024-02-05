@@ -35,9 +35,12 @@ static void getLogFname(char* logpath) {
 	strncpy(logpath, folder, MAX_PATH);
 	strncat(logpath, "/open-license.log", MAX_PATH - strlen(logpath));
 #else
-	const int plen = GetTempPath(MAX_PATH, logpath);
+	wchar_t wlogpath[MAX_PATH];
+	const int plen = GetTempPathW(MAX_PATH, wlogpath);
 	if(plen == 0) {
 		fprintf(stderr, "Error getting temporary directory path");
+	} else {
+		wcstombs(logpath, wlogpath, plen);
 	}
 	strncat(logpath, "open-license.log", MAX_PATH - strlen(logpath));
 #endif
