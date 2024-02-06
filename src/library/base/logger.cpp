@@ -40,7 +40,7 @@ static void getLogFname(char* logpath) {
 	if(plen == 0) {
 		fprintf(stderr, "Error getting temporary directory path");
 	} else {
-		wcstombs(logpath, wlogpath, plen);
+		wcstombs(logpath, wlogpath, MAX_PATH);
 	}
 	strncat(logpath, "open-license.log", MAX_PATH - strlen(logpath));
 #endif

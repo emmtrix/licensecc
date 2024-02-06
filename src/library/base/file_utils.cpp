@@ -69,4 +69,16 @@ string remove_extension(const string& path) {
 	return path.substr(0, dotpos);
 }
 
+string remove_file(const string& path) {
+	if (path == "." || path == "..") {
+		return path;
+	}
+	// find the last path separator
+	size_t pathsep_pos = path.find_last_of("\\/");
+	if (pathsep_pos != string::npos) {
+		return path.substr(0, pathsep_pos + 1);
+	}
+	return path;
+}
+
 }

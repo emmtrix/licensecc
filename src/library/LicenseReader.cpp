@@ -118,7 +118,7 @@ string FullLicenseInfo::printForSign() const {
 	}
 
 #ifndef NDEBUG
-	cout << "License to sign [" << oss.str() << "]" << endl;
+	cerr << "License [" << oss.str() << "]" << endl;
 #endif
 	return oss.str();
 }

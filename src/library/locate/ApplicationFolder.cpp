@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 #include <licensecc/datatypes.h>
 #include <licensecc_properties.h>
@@ -33,15 +34,42 @@ const vector<string> ApplicationFolder::license_locations(EventRegistry &eventRe
 	const FUNCTION_RETURN fret = getModuleName(fname);
 	if (fret == FUNC_RET_OK) {
 		const string module_name = remove_extension(fname);
-		const string temptativeLicense = string(module_name) + LCC_LICENSE_FILE_EXTENSION;
-		ifstream f(temptativeLicense.c_str());
-		if (f.good()) {
-			diskFiles.push_back(temptativeLicense);
-			eventRegistry.addEvent(LICENSE_FOUND, temptativeLicense.c_str());
-		} else {
-			eventRegistry.addEvent(LICENSE_FILE_NOT_FOUND, temptativeLicense.c_str());
+		{
+			const string temptativeLicense = string(module_name) + LCC_LICENSE_FILE_EXTENSION;
+			ifstream f(temptativeLicense.c_str());
+			if (f.good()) {
+				diskFiles.push_back(temptativeLicense);
+				eventRegistry.addEvent(LICENSE_FOUND, temptativeLicense.c_str());
+			} else {
+				eventRegistry.addEvent(LICENSE_FILE_NOT_FOUND, temptativeLicense.c_str());
+			}
+			f.close();
 		}
-		f.close();
+		{
+			const string module_dir = remove_file(fname);
+			string project_name = LCC_PROJECT_NAME;
+			string temptativeLicense = module_dir + project_name + LCC_LICENSE_FILE_EXTENSION;
+			ifstream f(temptativeLicense.c_str());
+			if (f.good()) {
+				diskFiles.push_back(temptativeLicense);
+				eventRegistry.addEvent(LICENSE_FOUND, temptativeLicense.c_str());
+			} else {
+				eventRegistry.addEvent(LICENSE_FILE_NOT_FOUND, temptativeLicense.c_str());
+				f.close();
+				std::transform(project_name.begin(), project_name.end(), project_name.begin(),
+							   [](unsigned char c) { return std::tolower(c); });
+				const string temptativeLicense = module_dir + project_name + LCC_LICENSE_FILE_EXTENSION;
+				ifstream f(temptativeLicense.c_str());
+				if (f.good()) {
+					diskFiles.push_back(temptativeLicense);
+					eventRegistry.addEvent(LICENSE_FOUND, temptativeLicense.c_str());
+				} else {
+					eventRegistry.addEvent(LICENSE_FILE_NOT_FOUND, temptativeLicense.c_str());
+				}
+				f.close();
+			}
+			f.close();
+		}
 	} else {
 		LOG_WARN("Error determining module name.");
 	}
