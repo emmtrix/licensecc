@@ -81,4 +81,24 @@ string remove_file(const string& path) {
 	return path;
 }
 
+string get_file(const string& path) {
+	if (path == "." || path == "..") {
+		return path;
+	}
+
+	size_t dotpos = path.find_last_of(".");
+	size_t pathsep_pos = path.find_last_of("\\/");
+
+	if (pathsep_pos == string::npos) {
+		if (dotpos == string::npos) {
+			return path;
+		} else {
+			return path.substr(0, dotpos);
+		}
+	} else if (pathsep_pos >= dotpos + 1) {
+		return path.substr(pathsep_pos + 1);
+	}
+
+	return path.substr(pathsep_pos + 1, dotpos - pathsep_pos - 1);
+}
 }

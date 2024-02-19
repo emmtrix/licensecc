@@ -16,6 +16,9 @@ namespace license {
 namespace locate {
 
 class ApplicationFolder : public LocatorStrategy {
+	void try_license_location(std::string file, EventRegistry& eventRegistry, std::vector<std::string>& diskFiles,
+							  bool tryLowercase = false, const std::string& dir = "");
+
 public:
 	ApplicationFolder();
 	const virtual std::vector<std::string> license_locations(EventRegistry& eventRegistry);

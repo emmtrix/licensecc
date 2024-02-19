@@ -17,6 +17,7 @@ std::vector<std::string> filter_existing_files(const std::vector<std::string>& f
 std::string get_file_contents(const char *filename,size_t max_size);
 std::string remove_extension(const std::string& path);
 std::string remove_file(const std::string& path);
+std::string get_file(const std::string& path);
 
 } /* namespace license */
 
